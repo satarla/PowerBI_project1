@@ -38,7 +38,7 @@ jobs:
   data-quality:
     runs-on: ubuntu-latest
     needs: lint
-    if: ${{ github.event.inputs.test_scope == 'all' || github.event.inputs.test_scope == 'data-quality' || github.event.inputs.test_scope == '' }}
+    if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.test_scope == 'all' || github.event.inputs.test_scope == 'data-quality' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -59,7 +59,7 @@ jobs:
   dax-validation:
     runs-on: ubuntu-latest
     needs: lint
-    if: ${{ github.event.inputs.test_scope == 'all' || github.event.inputs.test_scope == 'dax-validation' || github.event.inputs.test_scope == '' }}
+    if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.test_scope == 'all' || github.event.inputs.test_scope == 'dax-validation' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

@@ -79,11 +79,13 @@ class TestNullChecks:
 
     def test_product_critical_columns_have_no_nulls(self):
         products = load_csv(PRODUCTS_FILE)
-        assert products[["product_id", "category", "unit_price", "cost_price"]].isna().sum().sum() == 0
+        required = ["product_id", "category", "unit_price", "cost_price"]
+        assert products[required].isna().sum().sum() == 0
 
     def test_budget_critical_columns_have_no_nulls(self):
         budget = load_csv(BUDGET_FILE)
-        assert budget[["budget_id", "year", "month", "region", "budget_amount"]].isna().sum().sum() == 0
+        required = ["budget_id", "year", "month", "region", "budget_amount"]
+        assert budget[required].isna().sum().sum() == 0
 
 
 class TestDuplicateChecks:

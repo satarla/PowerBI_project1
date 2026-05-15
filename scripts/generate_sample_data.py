@@ -147,7 +147,10 @@ def validate_outputs(sales: pd.DataFrame, products: pd.DataFrame, budget: pd.Dat
         (set(sales["region"]).issubset(set(REGIONS)), "unexpected region in clean sales"),
         (sales["sales_amount"].gt(0).all(), "clean sales contains non-positive revenue"),
         (sales["discount_pct"].between(0, 1).all(), "clean sales has invalid discount"),
-        (set(sales["product_id"]).issubset(set(products["product_id"])), "missing product reference"),
+        (
+            set(sales["product_id"]).issubset(set(products["product_id"])),
+            "missing product reference",
+        ),
     ]
     failures = [message for passed, message in checks if not passed]
     if failures:
