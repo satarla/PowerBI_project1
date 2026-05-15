@@ -6,7 +6,6 @@ from pathlib import Path
 
 import pandas as pd
 
-
 RAW_DIR = Path("data/raw")
 SALES_FILE = RAW_DIR / "sales_2022_2024.csv"
 PRODUCTS_FILE = RAW_DIR / "products.csv"
@@ -67,14 +66,27 @@ class TestSchemaValidation:
 
     def test_budget_schema(self):
         budget = load_csv(BUDGET_FILE)
-        expected = {"budget_id", "year", "month", "region", "budget_amount", "actual_amount"}
+        expected = {
+            "budget_id",
+            "year",
+            "month",
+            "region",
+            "budget_amount",
+            "actual_amount",
+        }
         assert expected.issubset(budget.columns)
 
 
 class TestNullChecks:
     def test_sales_critical_columns_have_no_nulls(self):
         sales = load_csv(SALES_FILE)
-        critical_columns = ["order_id", "order_date", "ship_date", "product_id", "sales_amount"]
+        critical_columns = [
+            "order_id",
+            "order_date",
+            "ship_date",
+            "product_id",
+            "sales_amount",
+        ]
         assert sales[critical_columns].isna().sum().sum() == 0
 
     def test_product_critical_columns_have_no_nulls(self):

@@ -10,7 +10,6 @@ import numpy as np
 import pandas as pd
 from faker import Faker
 
-
 RAW_DIR = Path("data/raw")
 DIRTY_DIR = Path("data/dirty")
 REGIONS = ["North", "South", "East", "West"]
@@ -39,7 +38,9 @@ def make_products(fake: Faker, rng: Random, count: int = 200) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def make_sales(fake: Faker, rng: Random, products: pd.DataFrame, rows: int) -> pd.DataFrame:
+def make_sales(
+    fake: Faker, rng: Random, products: pd.DataFrame, rows: int
+) -> pd.DataFrame:
     start = pd.Timestamp("2022-01-01")
     end = pd.Timestamp("2024-12-31")
     date_range_days = (end - start).days
@@ -131,12 +132,16 @@ def make_dirty_sales(sales: pd.DataFrame, rng: Random) -> pd.DataFrame:
     duplicate_rows = dirty.sample(n=min(300, len(dirty)), random_state=42)
     dirty = pd.concat([dirty, duplicate_rows], ignore_index=True)
 
-    bug_mask = dirty["region"].eq("West") & dirty["order_date"].astype(str).str.startswith("2022")
+    bug_mask = dirty["region"].eq("West") & dirty["order_date"].astype(
+        str
+    ).str.startswith("2022")
     dirty.loc[bug_mask, "sales_amount"] = np.nan
     return dirty
 
 
-def validate_outputs(sales: pd.DataFrame, products: pd.DataFrame, budget: pd.DataFrame) -> None:
+def validate_outputs(
+    sales: pd.DataFrame, products: pd.DataFrame, budget: pd.DataFrame
+) -> None:
     checks = [
         (not sales.empty, "sales data is empty"),
         (not products.empty, "products data is empty"),
@@ -144,8 +149,14 @@ def validate_outputs(sales: pd.DataFrame, products: pd.DataFrame, budget: pd.Dat
         (sales["order_id"].is_unique, "order_id is not unique in clean sales"),
         (products["product_id"].is_unique, "product_id is not unique"),
         (budget["budget_id"].is_unique, "budget_id is not unique"),
-        (set(sales["region"]).issubset(set(REGIONS)), "unexpected region in clean sales"),
-        (sales["sales_amount"].gt(0).all(), "clean sales contains non-positive revenue"),
+        (
+            set(sales["region"]).issubset(set(REGIONS)),
+            "unexpected region in clean sales",
+        ),
+        (
+            sales["sales_amount"].gt(0).all(),
+            "clean sales contains non-positive revenue",
+        ),
         (sales["discount_pct"].between(0, 1).all(), "clean sales has invalid discount"),
         (
             set(sales["product_id"]).issubset(set(products["product_id"])),

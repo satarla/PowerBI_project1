@@ -6,7 +6,6 @@ from pathlib import Path
 
 import pandas as pd
 
-
 RAW_DIR = Path("data/raw")
 SALES_FILE = RAW_DIR / "sales_2022_2024.csv"
 BUDGET_FILE = RAW_DIR / "finance_budget.csv"
@@ -78,7 +77,9 @@ class TestVisualLevelAggregates:
     def test_category_sales_total_matches_grand_total_after_join(self):
         df = sales()
         products = pd.read_csv(RAW_DIR / "products.csv")
-        joined = df.merge(products[["product_id", "category"]], on="product_id", how="left")
+        joined = df.merge(
+            products[["product_id", "category"]], on="product_id", how="left"
+        )
         category_total = joined.groupby("category")["sales_amount"].sum().sum()
         assert round(category_total, 2) == round(df["sales_amount"].sum(), 2)
 
