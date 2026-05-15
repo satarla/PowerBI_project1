@@ -1,0 +1,78 @@
+name: Power BI QA Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      test_scope:
+        description: Test scope to run
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - data-quality
+          - dax-validation
+  schedule:
+    - cron: "0 6 * * *"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run lint checks
+        run: |
+          black --check scripts tests
+          isort --check-only scripts tests
+          flake8 scripts tests --max-line-length=100
+
+  data-quality:
+    runs-on: ubuntu-latest
+    needs: lint
+    if: ${{ github.event.inputs.test_scope == 'all' || github.event.inputs.test_scope == 'data-quality' || github.event.inputs.test_scope == '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Generate sample data
+        run: python scripts/generate_sample_data.py --rows 10000
+      - name: Run data quality tests
+        run: pytest tests/test_data_quality.py -v --html=reports/data_quality.html --self-contained-html
+      - name: Upload data quality report
+        uses: actions/upload-artifact@v4
+        with:
+          name: data-quality-report
+          path: reports/data_quality.html
+
+  dax-validation:
+    runs-on: ubuntu-latest
+    needs: lint
+    if: ${{ github.event.inputs.test_scope == 'all' || github.event.inputs.test_scope == 'dax-validation' || github.event.inputs.test_scope == '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Generate sample data
+        run: python scripts/generate_sample_data.py --rows 10000
+      - name: Run DAX validation tests
+        run: pytest tests/test_dax_validation.py -v --html=reports/dax_validation.html --self-contained-html
+      - name: Upload DAX validation report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dax-validation-report
+          path: reports/dax_validation.html
